@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-2" *ngFor="let photo of member.photos">
+        <img src="{{photo.url}}" alt="{{photo.url}}" class="img-thumbnail p-1">
+        <div class="text-center">
+            <button 
+                [disabled]="photo.isMain"
+                (click)="setMainPhoto(photo)"
+                [ngClass]='photo.isMain ? "btn-success active" : "btn-outline-success"'
+                class="btn btn-sm"
+              >Main</button>
+            <button 
+              [disabled]="photo.isMain"
+              (click)="deletePhoto(photo.id)"
+              class="btn btn-sm btn-danger"
+              ><i class="fa fa-trash"></i></button>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-4">
+        <input #inputImage id="inputImage" type="file" accept="image/*" (change)="selectFile($event)" />
+    </div>
+  
+    <div class="col-2">
+      <button class="btn btn-success btn-sm float-right" [disabled]="!selectedFiles" (click)="upload()">
+        Upload
+      </button>
+    </div>
+  </div>
+  
+  <div>
+    <img [src]="preview" class="img-thumbnail" style="width: 40%; ">
+  </div>
+  
+  <div *ngIf="currentFile && progress" class="progress my-3">
+    <div
+      class="progress-bar progress-bar-info"
+      role="progressbar"
+      attr.aria-valuenow="{{ progress }}"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [ngStyle]="{ width: progress + '%' }"
+    >
+      {{ progress }}%
+    </div>
+  </div>
+  
+  <div *ngIf="message" class="alert alert-secondary" role="alert">
+    {{ message }}
+  </div>
+  
