@@ -70,7 +70,14 @@ export class PhotoEditorComponent implements OnInit {
               this.progress = 0;
               this.preview = '';
               this.inputImage.nativeElement.value = '';
-              this.member.photos.push(event.body as Photo);
+              
+              var photo = event.body as Photo;
+              this.member.photos.push(photo);
+              if(photo.isMain){
+                this.user.photoUrl = photo.url;
+                this.member.photoUrl = photo.url;
+                this.accountService.setCurrentUser(this.user);
+              }
             }
           },
           error: (err: any) => {
