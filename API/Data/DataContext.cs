@@ -23,13 +23,13 @@ namespace API.Data
             builder.Entity<UserLike>()
                 .HasOne(s => s.SourceUser)
                 .WithMany(l => l.LikedUsers)
-                .HasForeignKey(l => l.SourceUserId)
-                .OnDelete(DeleteBehavior.NoAction);     
+                .HasForeignKey(s => s.SourceUserId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<UserLike>()
                 .HasOne(s => s.LikedUser)
                 .WithMany(l => l.LikedByUsers)
-                .HasForeignKey(l => l.LikedUserId)
+                .HasForeignKey(s => s.LikedUserId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }
