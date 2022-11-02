@@ -4,6 +4,6 @@
     {
         public string RecipientUsername { get; set; }
 
-        public string Content { get; set; }
+        public string Conttent { get; set; }
     }
 }
