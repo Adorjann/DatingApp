@@ -6,6 +6,8 @@ import { HubConnection,HubConnectionBuilder  } from '@microsoft/signalr';
 import { getPaginatedResult, getPaginationHeaders } from './paginationHelper';
 import { User } from '../_models/user';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { Group } from '../_models/group';
 
 @Injectable({
   providedIn: 'root'
@@ -28,16 +30,38 @@ export class MessageService {
     .withAutomaticReconnect()
     .build();
 
-    this.hubConnection.start().catch(error => console.log(error));
+    this.hubConnection.start()
+    .catch(error => console.log(error));
 
     this.hubConnection.on('ReceiveMessageThread', messages => {
       this.messageThreadSource.next(messages);
     })
 
+    this.hubConnection.on('NewMessage', message => {
+      this.messageThread$.pipe(take(1)).subscribe(messages => {
+        this.messageThreadSource.next([...messages, message]);
+      })
+    })
+
+    this.hubConnection.on('UpdatedGroup', (group: Group) => {
+      if (group.connections.some(x => x.username === otherUsername)) {
+        this.messageThread$.pipe(take(1)).subscribe(messages => {
+          messages.forEach(message => {
+            if (!message.dateRead) {
+              message.dateRead = new Date(Date.now())
+            }
+          })
+          this.messageThreadSource.next([...messages]);
+        })
+      }
+    })
+
   }
 
   stopHubConnection(){
-    this.hubConnection.stop();
+    if(this.hubConnection){
+      this.hubConnection.stop();
+    }
   }
 
   getMessages(pageNumber, pageSize, container){
@@ -51,8 +75,12 @@ export class MessageService {
     return this.http.get<Message[]>(this.baseUrl + 'messages/thread/' + username);
   }
 
-  sendMessage(username: string, conttent: string){
-    return this.http.post<Message>(this.baseUrl + 'messages', {recipientUsername: username, conttent})
+  async sendMessage(username: string, conttent: string){
+    return this.hubConnection.invoke('SendMessage', {recipientUsername: username, conttent})
+    .catch(error => console.log(error))
+    
+    
+    
   }
 
   deleteMessage(id: number){
